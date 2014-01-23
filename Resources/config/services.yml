@@ -1,0 +1,65 @@
+parameters:
+
+    weaving_the_web_framework_extra.authorization_user:       user
+    weaving_the_web_framework_extra.authorization_password:   TgyaFQXCVRz7Rp5fqK4grrqNwJkxr7
+    weaving_the_web_framework_extra.database_manager.class:   WeavingTheWeb\Bundle\FrameworkExtraBundle\Test\DatabaseManager
+    weaving_the_web_framework_extra.finder.class:             Symfony\Component\Finder\Finder
+    weaving_the_web_framework_extra.loader.class:             Symfony\Bridge\Doctrine\DataFixtures\ContainerAwareLoader
+    weaving_the_web_framework_extra.executor.class:           Doctrine\Common\DataFixtures\Executor\ORMExecutor
+    weaving_the_web_framework_extra.purger.class:             Doctrine\Common\DataFixtures\Purger\ORMPurger
+    weaving_the_web_framework_extra.string_input.class:       Symfony\Component\Console\Input\StringInput
+    weaving_the_web_framework_extra.stream_output.class:      Symfony\Component\Console\Output\StreamOutput
+    weaving_the_web_framework_extra.schema_manipulator.class: Doctrine\ORM\Tools\SchemaTool
+
+services:
+
+    weaving_the_web_framework_extra.database_manager:
+        class: %weaving_the_web_framework_extra.database_manager.class%
+        arguments:
+            - { mysql: @doctrine.orm.test_mysql_entity_manager, sqlite: @doctrine.orm.entity_manager }
+            - { mysql: @weaving_the_web_framework_extra.fixtures.test_mysql_executor, sqlite: @weaving_the_web_framework_extra.fixtures.executor }
+            - { mysql: @weaving_the_web_framework_extra.fixtures.test_mysql_schema_manipulator, sqlite: @weaving_the_web_framework_extra.fixtures.schema_manipulator }
+        properties:
+            finder: @weaving_the_web_framework_extra.fixtures.finder
+            loader: @weaving_the_web_framework_extra.fixtures.loader
+            logger: @logger
+
+    weaving_the_web_framework_extra.fixtures.executor:
+        class: %weaving_the_web_framework_extra.executor.class%
+        arguments:
+            - @doctrine.orm.entity_manager
+            - @weaving_the_web_framework_extra.fixtures.purger
+
+    weaving_the_web_framework_extra.fixtures.test_mysql_executor:
+        class: %weaving_the_web_framework_extra.executor.class%
+        arguments:
+            - @doctrine.orm.test_mysql_entity_manager
+            - @weaving_the_web_framework_extra.fixtures.test_mysql_purger
+
+    weaving_the_web_framework_extra.fixtures.test_mysql_purger:
+        class: %weaving_the_web_framework_extra.purger.class%
+        arguments:
+            - @doctrine.orm.test_mysql_entity_manager
+
+    weaving_the_web_framework_extra.fixtures.purger:
+        class: %weaving_the_web_framework_extra.purger.class%
+        arguments:
+            - @doctrine.orm.entity_manager
+
+    weaving_the_web_framework_extra.fixtures.schema_manipulator:
+        class: %weaving_the_web_framework_extra.schema_manipulator.class%
+        arguments:
+            - @doctrine.orm.entity_manager
+
+    weaving_the_web_framework_extra.fixtures.test_mysql_schema_manipulator:
+        class: %weaving_the_web_framework_extra.schema_manipulator.class%
+        arguments:
+            - @doctrine.orm.test_mysql_entity_manager
+
+    weaving_the_web_framework_extra.fixtures.finder:
+        class: %weaving_the_web_framework_extra.finder.class%
+
+    weaving_the_web_framework_extra.fixtures.loader:
+        class: %weaving_the_web_framework_extra.loader.class%
+        arguments:
+            - @service_container
